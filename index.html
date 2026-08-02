@@ -2,16 +2,15 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>XAU AI Trading Journal</title>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"/script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: Arial, sans-serif;
@@ -23,454 +22,95 @@
       margin: 0;
     }
 
-    .container {
-      max-width: 1320px;
-      margin: auto;
-      padding: 22px;
-    }
+    .container { max-width: 1320px; margin: auto; padding: 22px; }
 
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-      gap: 15px;
-    }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 15px; }
 
-    h2 {
-      font-size: 24px;
-      margin: 0;
-      letter-spacing: 0.3px;
-    }
+    h2 { font-size: 24px; margin: 0; letter-spacing: 0.3px; }
+    h3 { margin: 0 0 12px 0; }
+    .subtitle { font-size: 13px; opacity: 0.55; margin-top: 6px; }
 
-    h3 {
-      margin: 0 0 12px 0;
-    }
-
-    .subtitle {
-      font-size: 13px;
-      opacity: 0.55;
-      margin-top: 6px;
-    }
-
-    .grid {
-      display: grid;
-      gap: 16px;
-      margin-top: 14px;
-    }
-
-    .grid-2 {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .grid-3 {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .grid-5 {
-      grid-template-columns: repeat(5, 1fr);
-    }
-
-    .dashboard-grid {
-      grid-template-columns: 0.9fr 1.45fr;
-      align-items: stretch;
-    }
-
-    .chart-panel {
-      grid-template-columns: 1fr;
-    }
+    .grid { display: grid; gap: 16px; margin-top: 14px; }
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-5 { grid-template-columns: repeat(5, 1fr); }
+    .dashboard-grid { grid-template-columns: 0.9fr 1.45fr; align-items: stretch; }
+    .chart-panel { grid-template-columns: 1fr; }
 
     .card {
       background: linear-gradient(145deg, #111, #1a1a1a);
       border: 1px solid #242424;
       border-radius: 18px;
       padding: 16px;
-      box-shadow:
-        0 10px 30px rgba(0, 0, 0, 0.35),
-        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.03);
       transition: 0.2s ease;
     }
+    .card:hover { border-color: rgba(255, 215, 0, 0.28); box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45), 0 0 18px rgba(255, 215, 0, 0.08); }
 
-    .card:hover {
-      border-color: rgba(255, 215, 0, 0.28);
-      box-shadow:
-        0 14px 35px rgba(0, 0, 0, 0.45),
-        0 0 18px rgba(255, 215, 0, 0.08);
-    }
+    .hero-card { position: relative; overflow: hidden; text-align: center; padding: 26px; border: 1px solid rgba(255, 215, 0, 0.22); background: linear-gradient(145deg, rgba(255, 215, 0, 0.08), transparent), linear-gradient(145deg, #101010, #191919); }
+    .hero-label { opacity: 0.65; font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px; }
+    .big { font-size: 48px; font-weight: 800; margin-top: 8px; position: relative; z-index: 1; }
 
-    .hero-card {
-      position: relative;
-      overflow: hidden;
-      text-align: center;
-      padding: 26px;
-      border: 1px solid rgba(255, 215, 0, 0.22);
-      background:
-        linear-gradient(145deg, rgba(255, 215, 0, 0.08), transparent),
-        linear-gradient(145deg, #101010, #191919);
-    }
+    .kpi-bar .card, .roi-summary .card { min-height: 98px; display: flex; flex-direction: column; justify-content: center; text-align: center; background: linear-gradient(180deg, #101010, #0b0b0b); }
+    .kpi-label { opacity: 0.55; font-size: 13px; }
+    .stat { font-size: 24px; font-weight: 800; margin-top: 8px; }
 
-    .hero-label {
-      opacity: 0.65;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-    }
+    .green { color: #22c55e; }
+    .red { color: #ef4444; }
+    .orange { color: orange; }
+    .yellow { color: gold; }
 
-    .big {
-      font-size: 48px;
-      font-weight: 800;
-      margin-top: 8px;
-      position: relative;
-      z-index: 1;
-    }
+    .primary-btn { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; padding: 11px 18px; border-radius: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 22px rgba(34, 197, 94, 0.22); }
+    .primary-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-    .kpi-bar .card,
-    .roi-summary .card {
-      min-height: 98px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      text-align: center;
-      background: linear-gradient(180deg, #101010, #0b0b0b);
-    }
+    .ai-box { border-left: 4px solid gold; background: linear-gradient(180deg, rgba(255, 215, 0, 0.05), transparent), linear-gradient(145deg, #101010, #171717); }
+    .mini-card { text-align: center; padding: 12px; background: #0e0e0e; }
+    .ai-section { margin-top: 12px; padding: 12px; border-radius: 12px; border: 1px solid #252525; background: rgba(255, 255, 255, 0.025); line-height: 1.65; font-size: 14px; }
 
-    .kpi-label {
-      opacity: 0.55;
-      font-size: 13px;
-    }
+    .chart-box { height: 310px; position: relative; display: flex; flex-direction: column; }
+    .chart-large { height: 390px; }
+    .chart-title { font-weight: 800; opacity: 0.8; margin-bottom: 10px; text-align: left; }
+    .chart-box canvas { width: 100% !important; height: 100% !important; }
 
-    .stat {
-      font-size: 24px;
-      font-weight: 800;
-      margin-top: 8px;
-    }
+    .history-card { margin-top: 16px; }
+    #historyBox { max-height: 310px; overflow-y: auto; }
+    .row { display: flex; justify-content: space-between; gap: 12px; align-items: center; text-align: left; padding: 8px 0; font-size: 14px; }
+    .row button { color: #fff; border: none; border-radius: 8px; padding: 7px 10px; cursor: pointer; }
+    .edit-btn { background: #f59e0b; }
+    .delete-btn { background: #ef4444; }
 
-    .green {
-      color: #22c55e;
-    }
+    input, select { width: 100%; padding: 10px; margin-top: 9px; color: #fff; background: #202020; border: 1px solid #303030; border-radius: 10px; }
+    button { margin-top: 8px; }
 
-    .red {
-      color: #ef4444;
-    }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.78); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+    .modal.show { display: flex; }
+    .modal-content { width: 390px; max-width: calc(100% - 30px); background: linear-gradient(145deg, #101010, #1b1b1b); border: 1px solid #333; border-radius: 20px; padding: 20px; box-shadow: 0 0 35px rgba(255, 215, 0, 0.16); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; }
+    .close-btn { background: #333; color: #fff; width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer; }
+    .save-btn { width: 100%; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; font-weight: 800; cursor: pointer; }
 
-    .orange {
-      color: orange;
-    }
+    .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+    .loading-overlay.show { display: flex; }
+    .loader-box { background: linear-gradient(145deg, #111, #1c1c1c); border: 1px solid #333; border-radius: 18px; padding: 26px 32px; min-width: 240px; text-align: center; box-shadow: 0 0 35px rgba(255, 215, 0, 0.2); font-weight: bold; }
+    .spinner { width: 44px; height: 44px; border: 4px solid #333; border-top: 4px solid gold; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .yellow {
-      color: gold;
-    }
-
-    .primary-btn {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: white;
-      border: none;
-      padding: 11px 18px;
-      border-radius: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 8px 22px rgba(34, 197, 94, 0.22);
-    }
-
-    .primary-btn:hover {
-      filter: brightness(1.1);
-      transform: translateY(-1px);
-    }
-
-    .ai-box {
-      border-left: 4px solid gold;
-      background:
-        linear-gradient(180deg, rgba(255, 215, 0, 0.05), transparent),
-        linear-gradient(145deg, #101010, #171717);
-    }
-
-    .mini-card {
-      text-align: center;
-      padding: 12px;
-      background: #0e0e0e;
-    }
-
-    .ai-section {
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #252525;
-      background: rgba(255, 255, 255, 0.025);
-      line-height: 1.65;
-      font-size: 14px;
-    }
-
-    .chart-box {
-      height: 310px;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .chart-large {
-      height: 390px;
-    }
-
-    .chart-title {
-      font-weight: 800;
-      opacity: 0.8;
-      margin-bottom: 10px;
-      text-align: left;
-    }
-
-    .chart-box canvas {
-      width: 100% !important;
-      height: 100% !important;
-    }
-
-    .history-card {
-      margin-top: 16px;
-    }
-
-    #historyBox {
-      max-height: 310px;
-      overflow-y: auto;
-    }
-
-    .row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      text-align: left;
-      padding: 8px 0;
-      font-size: 14px;
-    }
-
-    .row button {
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 7px 10px;
-      cursor: pointer;
-    }
-
-    .edit-btn {
-      background: #f59e0b;
-    }
-
-    .delete-btn {
-      background: #ef4444;
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 9px;
-      color: #fff;
-      background: #202020;
-      border: 1px solid #303030;
-      border-radius: 10px;
-    }
-
-    button {
-      margin-top: 8px;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.78);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(6px);
-    }
-
-    .modal.show {
-      display: flex;
-    }
-
-    .modal-content {
-      width: 390px;
-      max-width: calc(100% - 30px);
-      background: linear-gradient(145deg, #101010, #1b1b1b);
-      border: 1px solid #333;
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 0 35px rgba(255, 215, 0, 0.16);
-    }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .close-btn {
-      background: #333;
-      color: #fff;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-    }
-
-    .save-btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #fff;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .loading-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      z-index: 99999;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(5px);
-    }
-
-    .loading-overlay.show {
-      display: flex;
-    }
-
-    .loader-box {
-      background: linear-gradient(145deg, #111, #1c1c1c);
-      border: 1px solid #333;
-      border-radius: 18px;
-      padding: 26px 32px;
-      min-width: 240px;
-      text-align: center;
-      box-shadow: 0 0 35px rgba(255, 215, 0, 0.2);
-      font-weight: bold;
-    }
-
-    .spinner {
-      width: 44px;
-      height: 44px;
-      border: 4px solid #333;
-      border-top: 4px solid gold;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 14px;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .auth-screen {
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(circle at top left, rgba(255, 215, 0, 0.12), transparent 32%),
-        radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.08), transparent 32%),
-        #080808;
-      z-index: 20000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .auth-card {
-      width: 420px;
-      max-width: 100%;
-      background: linear-gradient(145deg, #111, #1c1c1c);
-      border: 1px solid rgba(255, 215, 0, 0.22);
-      border-radius: 24px;
-      padding: 28px;
-      text-align: center;
-      box-shadow: 0 0 40px rgba(255, 215, 0, 0.12);
-    }
-
-    .auth-logo {
-      font-size: 34px;
-      margin-bottom: 10px;
-    }
-
-    .auth-title {
-      font-size: 24px;
-      font-weight: 900;
-      margin-bottom: 8px;
-    }
-
-    .auth-desc {
-      opacity: 0.65;
-      font-size: 14px;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-
-    .google-btn {
-      width: 100%;
-      padding: 13px;
-      border: none;
-      border-radius: 14px;
-      background: #fff;
-      color: #111;
-      font-weight: 900;
-      cursor: pointer;
-      font-size: 15px;
-    }
-
-    .app-hidden {
-      display: none !important;
-    }
-
-    .user-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-      padding: 10px 14px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid #262626;
-      border-radius: 14px;
-    }
-
-    .user-info {
-      font-size: 13px;
-      opacity: 0.8;
-    }
-
-    .logout-btn {
-      background: #333;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      padding: 8px 12px;
-      cursor: pointer;
-    }
+    .auth-screen { position: fixed; inset: 0; background: radial-gradient(circle at top left, rgba(255, 215, 0, 0.12), transparent 32%), radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.08), transparent 32%), #080808; z-index: 20000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .auth-card { width: 420px; max-width: 100%; background: linear-gradient(145deg, #111, #1c1c1c); border: 1px solid rgba(255, 215, 0, 0.22); border-radius: 24px; padding: 28px; text-align: center; box-shadow: 0 0 40px rgba(255, 215, 0, 0.12); }
+    .auth-logo { font-size: 34px; margin-bottom: 10px; }
+    .auth-title { font-size: 24px; font-weight: 900; margin-bottom: 8px; }
+    .auth-desc { opacity: 0.65; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+    .google-btn { width: 100%; padding: 13px; border: none; border-radius: 14px; background: #fff; color: #111; font-weight: 900; cursor: pointer; font-size: 15px; }
+    .app-hidden { display: none !important; }
+    .user-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 10px 14px; background: rgba(255, 255, 255, 0.04); border: 1px solid #262626; border-radius: 14px; }
+    .user-info { font-size: 13px; opacity: 0.8; }
+    .logout-btn { background: #333; color: #fff; border: none; border-radius: 10px; padding: 8px 12px; cursor: pointer; }
 
     @media (max-width: 980px) {
-      .grid-5,
-      .grid-3,
-      .grid-2,
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .topbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .primary-btn {
-        width: 100%;
-      }
-
-      .chart-large {
-        height: 330px;
-      }
+      .grid-5, .grid-3, .grid-2, .dashboard-grid { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; align-items: stretch; }
+      .primary-btn { width: 100%; }
+      .chart-large { height: 330px; }
     }
   </style>
 </head>
@@ -484,33 +124,22 @@
         กรุณา Login ด้วย Google / Gmail ก่อนใช้งาน Dashboard<br />
         หากไม่ล็อกอิน จะไม่สามารถดูข้อมูล บันทึก แก้ไข หรือลบรายการได้
       </div>
-
-      <button class="google-btn" onclick="loginWithGoogle()">
-        🔐 Login with Google
-      </button>
+      <button class="google-btn" onclick="loginWithGoogle()">🔐 Login with Google</button>
     </div>
   </div>
 
   <div id="appRoot" class="container app-hidden">
     <div class="user-bar">
-      <div class="user-info">
-        👤 Logged in: <span id="userEmail"></span>
-      </div>
-
+      <div class="user-info">👤 Logged in: <span id="userEmail"></span></div>
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
     <div class="topbar">
       <div>
         <h2>📊 XAU AI Trading Journal</h2>
-        <div class="subtitle">
-          Gold Trading Journal + AI Coach + Google Sheets
-        </div>
+        <div class="subtitle">Gold Trading Journal + AI Coach + Google Sheets</div>
       </div>
-
-      <button class="primary-btn" onclick="openTradeModal()">
-        ➕ บันทึกเทรด
-      </button>
+      <button class="primary-btn" onclick="openTradeModal()">➕ บันทึกเทรด</button>
     </div>
 
     <div class="card hero-card">
@@ -519,62 +148,27 @@
     </div>
 
     <div class="grid grid-5 kpi-bar">
-      <div class="card">
-        <div class="kpi-label">Winrate</div>
-        <div id="winrate" class="stat"></div>
-      </div>
-      <div class="card">
-        <div class="kpi-label">Trades</div>
-        <div id="total" class="stat"></div>
-      </div>
-      <div class="card">
-        <div class="kpi-label">Avg Win</div>
-        <div id="avgWin" class="stat green"></div>
-      </div>
-      <div class="card">
-        <div class="kpi-label">Avg Loss</div>
-        <div id="avgLoss" class="stat red"></div>
-      </div>
-      <div class="card">
-        <div class="kpi-label">Expectancy</div>
-        <div id="expectancy" class="stat"></div>
-      </div>
+      <div class="card"><div class="kpi-label">Winrate</div><div id="winrate" class="stat"></div></div>
+      <div class="card"><div class="kpi-label">Trades</div><div id="total" class="stat"></div></div>
+      <div class="card"><div class="kpi-label">Avg Win</div><div id="avgWin" class="stat green"></div></div>
+      <div class="card"><div class="kpi-label">Avg Loss</div><div id="avgLoss" class="stat red"></div></div>
+      <div class="card"><div class="kpi-label">Expectancy</div><div id="expectancy" class="stat"></div></div>
     </div>
 
     <div class="grid grid-3 roi-summary">
-      <div class="card">
-        <div class="kpi-label">ROI วันนี้</div>
-        <div id="roiToday" class="stat"></div>
-      </div>
-      <div class="card">
-        <div class="kpi-label">ROI สัปดาห์นี้</div>
-        <div id="roiWeek" class="stat"></div>
-      </div>
-      <div class="card">
-        <div class="kpi-label">ROI เดือนนี้</div>
-        <div id="roiMonth" class="stat"></div>
-      </div>
+      <div class="card"><div class="kpi-label">ROI วันนี้</div><div id="roiToday" class="stat"></div></div>
+      <div class="card"><div class="kpi-label">ROI สัปดาห์นี้</div><div id="roiWeek" class="stat"></div></div>
+      <div class="card"><div class="kpi-label">ROI เดือนนี้</div><div id="roiMonth" class="stat"></div></div>
     </div>
 
     <div class="grid dashboard-grid">
       <div class="card ai-box">
         <h3>🤖 AI Trading Coach</h3>
-
         <div class="grid grid-3">
-          <div class="card mini-card">
-            <div class="kpi-label">AI Score</div>
-            <div id="aiScore" class="stat"></div>
-          </div>
-          <div class="card mini-card">
-            <div class="kpi-label">Status</div>
-            <div id="aiStatus" class="stat"></div>
-          </div>
-          <div class="card mini-card">
-            <div class="kpi-label">Risk</div>
-            <div id="aiRisk" class="stat"></div>
-          </div>
+          <div class="card mini-card"><div class="kpi-label">AI Score</div><div id="aiScore" class="stat"></div></div>
+          <div class="card mini-card"><div class="kpi-label">Status</div><div id="aiStatus" class="stat"></div></div>
+          <div class="card mini-card"><div class="kpi-label">Risk</div><div id="aiRisk" class="stat"></div></div>
         </div>
-
         <div class="ai-section" id="aiCore"></div>
         <div class="ai-section" id="aiCurrent"></div>
         <div class="ai-section" id="aiWorst"></div>
@@ -582,46 +176,21 @@
       </div>
 
       <div class="grid chart-panel">
-        <div class="card chart-box chart-large">
-          <div class="chart-title">📈 Equity Curve</div>
-          <canvas id="equityChart"></canvas>
-        </div>
-
+        <div class="card chart-box chart-large"><div class="chart-title">📈 Equity Curve</div><canvas id="equityChart"></canvas></div>
         <div class="grid grid-2">
-          <div class="card chart-box">
-            <div class="chart-title">📉 Drawdown</div>
-            <canvas id="timeChart"></canvas>
-          </div>
-
-          <div class="card chart-box">
-            <div class="chart-title">📊 Reason Analysis</div>
-            <canvas id="reasonChart"></canvas>
-          </div>
+          <div class="card chart-box"><div class="chart-title">📉 Drawdown</div><canvas id="timeChart"></canvas></div>
+          <div class="card chart-box"><div class="chart-title">📊 Reason Analysis</div><canvas id="reasonChart"></canvas></div>
         </div>
       </div>
     </div>
 
     <div class="grid grid-3">
-      <div class="card chart-box">
-        <div class="chart-title">📊 ROI รายวัน</div>
-        <canvas id="roiDailyChart"></canvas>
-      </div>
-      <div class="card chart-box">
-        <div class="chart-title">📆 ROI รายสัปดาห์</div>
-        <canvas id="roiWeeklyChart"></canvas>
-      </div>
-      <div class="card chart-box">
-        <div class="chart-title">📈 ROI รายเดือน</div>
-        <canvas id="roiMonthlyChart"></canvas>
-      </div>
+      <div class="card chart-box"><div class="chart-title">📊 ROI รายวัน</div><canvas id="roiDailyChart"></canvas></div>
+      <div class="card chart-box"><div class="chart-title">📆 ROI รายสัปดาห์</div><canvas id="roiWeeklyChart"></canvas></div>
+      <div class="card chart-box"><div class="chart-title">📈 ROI รายเดือน</div><canvas id="roiMonthlyChart"></canvas></div>
     </div>
 
-    <div class="card history-card">
-      <h3>History</h3>
-      <div id="historyBox">
-        <div id="list"></div>
-      </div>
-    </div>
+    <div class="card history-card"><h3>History</h3><div id="historyBox"><div id="list"></div></div></div>
   </div>
 
   <div id="tradeModal" class="modal">
@@ -630,28 +199,15 @@
         <h3 id="modalTitle">➕ บันทึกเทรด</h3>
         <button class="close-btn" onclick="closeTradeModal()">✕</button>
       </div>
-
       <input type="date" id="date" />
-
-      <select id="result">
-        <option value="win">✅ เทรดชนะ</option>
-        <option value="loss">❌ เทรดเสีย</option>
-      </select>
-
+      <select id="result"><option value="win">✅ เทรดชนะ</option><option value="loss">❌ เทรดเสีย</option></select>
       <select id="reason"></select>
-
       <input id="qty" type="number" placeholder="USD" />
-
       <button class="save-btn" onclick="save()">SAVE</button>
     </div>
   </div>
 
-  <div id="loadingOverlay" class="loading-overlay">
-    <div class="loader-box">
-      <div class="spinner"></div>
-      <div id="loadingText">กำลังดำเนินการ...</div>
-    </div>
-  </div>
+  <div id="loadingOverlay" class="loading-overlay"><div class="loader-box"><div class="spinner"></div><div id="loadingText">กำลังดำเนินการ...</div></div></div>
 
   <script>
     const firebaseConfig = {
@@ -664,10 +220,8 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-
     const auth = firebase.auth();
     const googleProvider = new firebase.auth.GoogleAuthProvider();
-
     let currentUser = null;
 
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbw-has2KXQnuvwOYutMof0Y4ly0emoBRFMhBTsptTro8de6TJ0s-8G4spkAY5BZR-aN/exec";
@@ -689,154 +243,87 @@
     const resultEl = document.getElementById("result");
     const reasonEl = document.getElementById("reason");
 
-    const lossReasons = [
-      "ไม่มีแผน",
-      "ใช้อารมณ์",
-      "โอเวอร์เทรด",
-      "ไม่ยอม Cut Loss",
-      "ไม่มี Edge",
-      "เปลี่ยนระบบบ่อย",
-      "ไม่เรียนรู้จากอดีต",
-      "Position size ผิด"
-    ];
-
-    const winReasons = [
-      "มีแผนชัด (Trading Plan)",
-      "มี Edge",
-      "วินัยสูง",
-      "คุมความเสี่ยงเก่ง",
-      "Cut Loss เร็ว",
-      "ไม่เทรดเยอะ",
-      "วิเคราะห์ตัวเอง",
-      "คุมอารมณ์ได้"
-    ];
+    const lossReasons = ["ไม่มีแผน", "ใช้อารมณ์", "โอเวอร์เทรด", "ไม่ยอม Cut Loss", "ไม่มี Edge", "เปลี่ยนระบบบ่อย", "ไม่เรียนรู้จากอดีต", "Position size ผิด"];
+    const winReasons = ["มีแผนชัด (Trading Plan)", "มี Edge", "วินัยสูง", "คุมความเสี่ยงเก่ง", "Cut Loss เร็ว", "ไม่เทรดเยอะ", "วิเคราะห์ตัวเอง", "คุมอารมณ์ได้"];
 
     function setLoading(show, text = "กำลังดำเนินการ...") {
       const overlay = document.getElementById("loadingOverlay");
       const loadingText = document.getElementById("loadingText");
-
       if (!overlay || !loadingText) return;
-
       loadingText.innerText = text;
-
-      if (show) {
-        overlay.classList.add("show");
-      } else {
-        overlay.classList.remove("show");
-      }
+      if (show) overlay.classList.add("show");
+      else overlay.classList.remove("show");
     }
 
     function loginWithGoogle() {
       setLoading(true, "กำลังเข้าสู่ระบบ...");
-
       auth.signInWithPopup(googleProvider)
-        .then(() => {
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error(err);
-          setLoading(false);
-          alert("เข้าสู่ระบบไม่สำเร็จ");
-        });
+        .then(() => setLoading(false))
+        .catch((err) => { console.error(err); setLoading(false); alert("เข้าสู่ระบบไม่สำเร็จ"); });
     }
 
     function logout() {
       setLoading(true, "กำลังออกจากระบบ...");
-
       auth.signOut()
-        .then(() => {
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error(err);
-          setLoading(false);
-        });
+        .then(() => setLoading(false))
+        .catch((err) => { console.error(err); setLoading(false); });
     }
 
     function showApp(user) {
       currentUser = user;
-
       document.getElementById("authScreen").style.display = "none";
       document.getElementById("appRoot").classList.remove("app-hidden");
       document.getElementById("userEmail").innerText = user.email || "-";
-
       setLoading(true, "กำลังโหลดข้อมูล...");
-      loadData(() => {
-        setLoading(false);
-      });
+      loadData(() => setLoading(false));
     }
 
     function lockApp() {
       currentUser = null;
       records = [];
-
       document.getElementById("authScreen").style.display = "flex";
       document.getElementById("appRoot").classList.add("app-hidden");
       document.getElementById("userEmail").innerText = "";
-
       clearCharts();
     }
 
     auth.onAuthStateChanged((user) => {
-      if (user) {
-        showApp(user);
-      } else {
-        lockApp();
-      }
+      if (user) showApp(user);
+      else lockApp();
     });
 
     function loadReasons() {
-      let arr = resultEl.value === "win" ? winReasons : lossReasons;
+      const arr = resultEl.value === "win" ? winReasons : lossReasons;
       reasonEl.innerHTML = "<option value=''>--เลือกเหตุผล--</option>";
-
-      arr.forEach((r) => {
-        reasonEl.innerHTML += `<option value="${r}">${r}</option>`;
-      });
+      arr.forEach((r) => { reasonEl.innerHTML += `<option value="${r}">${r}</option>`; });
     }
 
     resultEl.onchange = loadReasons;
     loadReasons();
 
     function openTradeModal() {
-      if (!currentUser) {
-        alert("กรุณา Login ก่อนใช้งาน");
-        return;
-      }
-
+      if (!currentUser) return alert("กรุณา Login ก่อนใช้งาน");
       editingId = null;
-
       document.getElementById("modalTitle").innerText = "➕ บันทึกเทรด";
       document.getElementById("date").value = "";
       document.getElementById("qty").value = "";
       resultEl.value = "win";
       loadReasons();
       reasonEl.value = "";
-
       document.getElementById("tradeModal").classList.add("show");
     }
 
     function openEditModal(id) {
-      if (!currentUser) {
-        alert("กรุณา Login ก่อนใช้งาน");
-        return;
-      }
-
+      if (!currentUser) return alert("กรุณา Login ก่อนใช้งาน");
       const item = records.find((r) => String(r.id) === String(id));
-
-      if (!item) {
-        alert("ไม่พบรายการที่ต้องการแก้ไข");
-        return;
-      }
-
+      if (!item) return alert("ไม่พบรายการที่ต้องการแก้ไข");
       editingId = item.id;
-
       document.getElementById("modalTitle").innerText = "✏️ แก้ไขรายการ";
       document.getElementById("date").value = item.date;
       resultEl.value = item.result;
       loadReasons();
       reasonEl.value = item.reason;
       document.getElementById("qty").value = item.qty;
-
       document.getElementById("tradeModal").classList.add("show");
     }
 
@@ -845,26 +332,19 @@
       document.getElementById("tradeModal").classList.remove("show");
     }
 
-    document.getElementById("tradeModal").addEventListener("click", function (e) {
-      if (e.target.id === "tradeModal") {
-        closeTradeModal();
-      }
-    });
+    document.getElementById("tradeModal").addEventListener("click", (e) => { if (e.target.id === "tradeModal") closeTradeModal(); });
 
     function loadData(afterLoad) {
       const callbackName = "loadSheetCallback_" + Date.now();
       const script = document.createElement("script");
-
       window[callbackName] = function (response) {
         if (!response.success) {
           alert("โหลดข้อมูลไม่สำเร็จ: " + response.message);
           delete window[callbackName];
           script.remove();
-
           if (afterLoad) afterLoad();
           return;
         }
-
         records = response.data.map((r) => ({
           id: String(r.id || ""),
           date: String(r.date || ""),
@@ -872,503 +352,244 @@
           reason: String(r.reason || ""),
           qty: Number(r.qty) || 0
         }));
-
         render();
-
         delete window[callbackName];
         script.remove();
-
         if (afterLoad) afterLoad();
       };
-
       script.src = `${SHEET_API_URL}?callback=${callbackName}&token=${SHEET_TOKEN}`;
       document.body.appendChild(script);
     }
 
     function save() {
-      if (!currentUser) {
-        alert("กรุณา Login ก่อนใช้งาน");
-        return;
-      }
-
-      let date = document.getElementById("date").value;
-      let result = resultEl.value;
-      let reason = reasonEl.value;
-      let qty = parseFloat(document.getElementById("qty").value) || 0;
-
-      if (!date || !reason || !qty) {
-        alert("กรอกข้อมูลให้ครบ");
-        return;
-      }
-
+      if (!currentUser) return alert("กรุณา Login ก่อนใช้งาน");
+      const date = document.getElementById("date").value;
+      const result = resultEl.value;
+      const reason = reasonEl.value;
+      const qty = parseFloat(document.getElementById("qty").value) || 0;
+      if (!date || !reason || !qty) return alert("กรอกข้อมูลให้ครบ");
       const isEdit = editingId !== null;
-
-      const payload = {
-        token: SHEET_TOKEN,
-        action: isEdit ? "update" : "add",
-        id: isEdit ? editingId : "T" + Date.now(),
-        date,
-        result,
-        reason,
-        qty
-      };
-
+      const payload = { token: SHEET_TOKEN, action: isEdit ? "update" : "add", id: isEdit ? editingId : "T" + Date.now(), date, result, reason, qty };
       setLoading(true, isEdit ? "กำลังแก้ไขข้อมูล..." : "กำลังบันทึกข้อมูล...");
-
-      fetch(SHEET_API_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "text/plain"
-        },
-        body: JSON.stringify(payload)
-      })
-      .then(() => {
-        document.getElementById("date").value = "";
-        document.getElementById("qty").value = "";
-        reasonEl.value = "";
-
-        closeTradeModal();
-
-        setTimeout(() => {
-          loadData(() => {
-            setLoading(false);
-          });
-        }, 900);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-        alert("บันทึกไม่สำเร็จ");
-      });
+      fetch(SHEET_API_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) })
+        .then(() => {
+          document.getElementById("date").value = "";
+          document.getElementById("qty").value = "";
+          reasonEl.value = "";
+          closeTradeModal();
+          setTimeout(() => loadData(() => setLoading(false)), 900);
+        })
+        .catch((err) => { console.error(err); setLoading(false); alert("บันทึกไม่สำเร็จ"); });
     }
 
     function del(id) {
-      if (!currentUser) {
-        alert("กรุณา Login ก่อนใช้งาน");
-        return;
-      }
-
+      if (!currentUser) return alert("กรุณา Login ก่อนใช้งาน");
       if (!confirm("ต้องการลบรายการนี้ใช่ไหม?")) return;
-
       setLoading(true, "กำลังลบข้อมูล...");
-
-      fetch(SHEET_API_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "text/plain"
-        },
-        body: JSON.stringify({
-          token: SHEET_TOKEN,
-          action: "delete",
-          id
-        })
-      })
-      .then(() => {
-        setTimeout(() => {
-          loadData(() => {
-            setLoading(false);
-          });
-        }, 900);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-        alert("ลบข้อมูลไม่สำเร็จ");
-      });
+      fetch(SHEET_API_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ token: SHEET_TOKEN, action: "delete", id }) })
+        .then(() => setTimeout(() => loadData(() => setLoading(false)), 900))
+        .catch((err) => { console.error(err); setLoading(false); alert("ลบข้อมูลไม่สำเร็จ"); });
     }
 
     function calculateNetProfit() {
       let p = 0;
-
       records.forEach((r) => {
         const result = String(r.result || "").trim().toLowerCase();
         const qty = Number(r.qty) || 0;
-
         if (result === "win") p += qty;
         if (result === "loss") p -= qty;
       });
-
       return p.toFixed(2);
     }
 
     function calculateStats() {
-      let w = 0;
-      let l = 0;
-      let tw = 0;
-      let tl = 0;
-
+      let w = 0, l = 0, tw = 0, tl = 0;
       records.forEach((r) => {
         const result = String(r.result || "").trim().toLowerCase();
         const qty = Number(r.qty) || 0;
-
-        if (result === "win") {
-          w++;
-          tw += qty;
-        }
-
-        if (result === "loss") {
-          l++;
-          tl += qty;
-        }
+        if (result === "win") { w++; tw += qty; }
+        if (result === "loss") { l++; tl += qty; }
       });
-
-      let t = w + l;
-
-      return {
-        w,
-        l,
-        t,
-        wr: t ? ((w / t) * 100).toFixed(2) : "0.00",
-        aw: w ? (tw / w).toFixed(2) : "0.00",
-        al: l ? (tl / l).toFixed(2) : "0.00"
-      };
+      const t = w + l;
+      return { w, l, t, wr: t ? ((w / t) * 100).toFixed(2) : "0.00", aw: w ? (tw / w).toFixed(2) : "0.00", al: l ? (tl / l).toFixed(2) : "0.00" };
     }
 
     function calculateExpectancy(s) {
-      let winrate = s.w / s.t || 0;
-      let lossrate = s.l / s.t || 0;
+      const winrate = s.w / s.t || 0;
+      const lossrate = s.l / s.t || 0;
       return (winrate * s.aw - lossrate * s.al).toFixed(2);
     }
 
     function calcAIScore() {
-      let s = calculateStats();
-      let exp = Number(calculateExpectancy(s));
-
+      const s = calculateStats();
+      const exp = Number(calculateExpectancy(s));
       let score = 50;
-
       score += Number(s.wr) > 50 ? 20 : -20;
       score += exp > 0 ? 20 : -20;
       score += Number(s.aw) > Number(s.al) ? 10 : -10;
-
       return Math.max(0, Math.min(100, Math.round(score)));
     }
 
     function runAI() {
       if (records.length === 0) return "ยังไม่มีข้อมูล";
-
       let text = "";
-      let s = calculateStats();
-      let exp = calculateExpectancy(s);
-
+      const s = calculateStats();
+      const exp = calculateExpectancy(s);
       text += `📊 Winrate: ${s.wr}%<br>`;
       text += `📊 Avg Win: +${s.aw} | Avg Loss: -${s.al}<br><br>`;
-
-      if (Number(exp) > 0) {
-        text += `✅ ระบบมีกำไร (Expectancy +${exp})<br>`;
-      } else {
-        text += `❌ ระบบติดลบ (Expectancy ${exp})<br>`;
-      }
-
-      let worst = records
-        .filter((r) => r.result === "loss")
-        .sort((a, b) => b.qty - a.qty)[0];
-
-      if (worst) {
-        text += `<br>💥 ไม้พังสุด:<br>${worst.date} | -${worst.qty}<br>เหตุผล: ${worst.reason}<br>`;
-      }
-
-      if (Number(s.al) > Number(s.aw)) {
-        text += `🔥 Loss ใหญ่กว่า Win → Risk Management มีปัญหา<br>`;
-      }
-
-      if (Number(s.wr) < 40) {
-        text += `⚠️ Winrate ต่ำ → Entry ยังไม่ดีพอ<br>`;
-      }
-
+      text += Number(exp) > 0 ? `✅ ระบบมีกำไร (Expectancy +${exp})<br>` : `❌ ระบบติดลบ (Expectancy ${exp})<br>`;
+      const worst = records.filter((r) => r.result === "loss").sort((a, b) => b.qty - a.qty)[0];
+      if (worst) text += `<br>💥 ไม้พังสุด:<br>${worst.date} | -${worst.qty}<br>เหตุผล: ${worst.reason}<br>`;
+      if (Number(s.al) > Number(s.aw)) text += `🔥 Loss ใหญ่กว่า Win → Risk Management มีปัญหา<br>`;
+      if (Number(s.wr) < 40) text += `⚠️ Winrate ต่ำ → Entry ยังไม่ดีพอ<br>`;
       return text;
     }
 
     function getWeekNumber(date) {
-      let d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-      let dayNum = d.getUTCDay() || 7;
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
       d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-      let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
       return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
     }
 
-    function getWeekKey(date) {
-      let d = new Date(date);
-      return d.getFullYear() + "-W" + String(getWeekNumber(d)).padStart(2, "0");
-    }
-
-    function getMonthKey(date) {
-      let d = new Date(date);
-      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
-    }
-
-    function getTodayKey() {
-      const d = new Date();
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-
-      return `${year}-${month}-${day}`;
-    }
-
-    function getYearKey(date) {
-      const d = new Date(date);
-      return String(d.getFullYear());
-    }
+    function getWeekKey(date) { const d = new Date(date); return d.getFullYear() + "-W" + String(getWeekNumber(d)).padStart(2, "0"); }
+    function getMonthKey(date) { const d = new Date(date); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); }
+    function getTodayKey() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
+    function getYearKey(date) { return String(new Date(date).getFullYear()); }
 
     function buildProfitMap(type) {
-      let map = {};
-
+      const map = {};
       records.forEach((r) => {
         let key = "";
         const result = String(r.result || "").trim().toLowerCase();
         const qty = Number(r.qty) || 0;
-
         if (type === "day") key = r.date;
         if (type === "week") key = getWeekKey(r.date);
         if (type === "month") key = getMonthKey(r.date);
         if (type === "year") key = getYearKey(r.date);
-
         if (!map[key]) map[key] = 0;
-
         if (result === "win") map[key] += qty;
         if (result === "loss") map[key] -= qty;
       });
-
       return map;
     }
 
-    function profitToROI(profit) {
-      return Number(((profit / INITIAL_CAPITAL) * 100).toFixed(2));
-    }
-
-    function formatROI(value) {
-      let num = Number(value);
-      return (num >= 0 ? "+" : "") + num.toFixed(2) + "%";
-    }
-
-    function setROIValue(id, value) {
-      let el = document.getElementById(id);
-      let num = Number(value);
-
-      el.innerText = formatROI(num);
-      el.style.color = num >= 0 ? "#22c55e" : "#ef4444";
-    }
+    function profitToROI(profit) { return Number(((profit / INITIAL_CAPITAL) * 100).toFixed(2)); }
+    function formatROI(value) { const num = Number(value); return (num >= 0 ? "+" : "") + num.toFixed(2) + "%"; }
+    function setROIValue(id, value) { const el = document.getElementById(id); const num = Number(value); el.innerText = formatROI(num); el.style.color = num >= 0 ? "#22c55e" : "#ef4444"; }
 
     function renderROISummary() {
-      let today = getTodayKey();
-      let weekKey = getWeekKey(today);
-      let monthKey = getMonthKey(today);
-
-      let dayMap = buildProfitMap("day");
-      let weekMap = buildProfitMap("week");
-      let monthMap = buildProfitMap("month");
-
+      const today = getTodayKey();
+      const weekKey = getWeekKey(today);
+      const monthKey = getMonthKey(today);
+      const dayMap = buildProfitMap("day");
+      const weekMap = buildProfitMap("week");
+      const monthMap = buildProfitMap("month");
       setROIValue("roiToday", profitToROI(dayMap[today] || 0));
       setROIValue("roiWeek", profitToROI(weekMap[weekKey] || 0));
       setROIValue("roiMonth", profitToROI(monthMap[monthKey] || 0));
     }
 
     function analyzeInsight() {
-      let s = calculateStats();
-      let exp = Number(calculateExpectancy(s));
+      const s = calculateStats();
+      const exp = Number(calculateExpectancy(s));
       let text = "💡 AI Insight:<br>";
-
-      if (records.length === 0) {
-        text += "ยังไม่มีข้อมูลให้วิเคราะห์";
-        return text;
-      }
-
-      if (Number(s.al) > Number(s.aw)) {
-        text += `<span class="red">🔥 Loss ใหญ่ → Risk Management พัง</span><br>`;
-      }
-
-      if (Number(s.wr) < 40) {
-        text += `<span class="orange">⚠️ Winrate ต่ำ → ควรคัด entry ให้เข้มขึ้น</span><br>`;
-      }
-
-      if (exp < 0) {
-        text += `<span class="red">❌ ระบบติดลบ → ควรลด lot และทบทวนแผน</span><br>`;
-      }
-
+      if (records.length === 0) return text + "ยังไม่มีข้อมูลให้วิเคราะห์";
+      if (Number(s.al) > Number(s.aw)) text += `<span class="red">🔥 Loss ใหญ่ → Risk Management พัง</span><br>`;
+      if (Number(s.wr) < 40) text += `<span class="orange">⚠️ Winrate ต่ำ → ควรคัด entry ให้เข้มขึ้น</span><br>`;
+      if (exp < 0) text += `<span class="red">❌ ระบบติดลบ → ควรลด lot และทบทวนแผน</span><br>`;
       text += `<br><span class="green">✅ แนะนำ: ลด lot + เลือก entry คุณภาพสูงขึ้น</span>`;
-
       return text;
     }
 
     function analyzeCurrentPerformance() {
-      if (records.length === 0) {
-        return "📌 สรุปปัจจุบัน:<br>ยังไม่มีข้อมูลให้วิเคราะห์";
-      }
-
+      if (records.length === 0) return "📌 สรุปปัจจุบัน:<br>ยังไม่มีข้อมูลให้วิเคราะห์";
       const todayKey = getTodayKey();
       const weekKey = getWeekKey(todayKey);
       const monthKey = getMonthKey(todayKey);
       const yearKey = getYearKey(todayKey);
-
       const dayMap = buildProfitMap("day");
       const weekMap = buildProfitMap("week");
       const monthMap = buildProfitMap("month");
       const yearMap = buildProfitMap("year");
-
+      function line(label, profit, roi) {
+        const color = profit >= 0 ? "green" : "red";
+        const sign = profit >= 0 ? "+" : "";
+        return `${label}: <span class="${color}">${sign}${profit.toFixed(2)} USD (${formatROI(roi)})</span><br>`;
+      }
       const todayProfit = dayMap[todayKey] || 0;
       const weekProfit = weekMap[weekKey] || 0;
       const monthProfit = monthMap[monthKey] || 0;
       const yearProfit = yearMap[yearKey] || 0;
-
-      const todayROI = profitToROI(todayProfit);
-      const weekROI = profitToROI(weekProfit);
-      const monthROI = profitToROI(monthProfit);
-      const yearROI = profitToROI(yearProfit);
-
-      function line(label, profit, roi) {
-        const color = profit >= 0 ? "green" : "red";
-        const sign = profit >= 0 ? "+ " : "";
-
-        return `${label}: <span class="${color}">${sign}${profit.toFixed(2)} USD (${formatROI(roi)})</span><br>`;
-      }
-
       let text = "📌 สรุปปัจจุบัน:<br>";
-
-      text += line("วันนี้", todayProfit, todayROI);
-      text += line("สัปดาห์นี้", weekProfit, weekROI);
-      text += line("เดือนนี้", monthProfit, monthROI);
-      text += line("รวมในปีนี้", yearProfit, yearROI);
-
+      text += line("วันนี้", todayProfit, profitToROI(todayProfit));
+      text += line("สัปดาห์นี้", weekProfit, profitToROI(weekProfit));
+      text += line("เดือนนี้", monthProfit, profitToROI(monthProfit));
+      text += line("รวมในปีนี้", yearProfit, profitToROI(yearProfit));
       return text;
     }
 
     function analyzeWorstPerformance() {
-      if (records.length === 0) {
-        return "📉 ช่วงที่แย่ที่สุด:<br>ยังไม่มีข้อมูลให้วิเคราะห์";
-      }
-
+      if (records.length === 0) return "📉 ช่วงที่แย่ที่สุด:<br>ยังไม่มีข้อมูลให้วิเคราะห์";
       const dayMap = buildProfitMap("day");
       const weekMap = buildProfitMap("week");
       const monthMap = buildProfitMap("month");
       const yearMap = buildProfitMap("year");
-
-      function findWorst(map) {
-        let worst = null;
-
-        for (let key in map) {
-          if (!worst || map[key] < map[worst]) {
-            worst = key;
-          }
-        }
-
-        return worst;
-      }
-
-      function line(label, key, map) {
-        if (!key) return "";
-
-        const profit = map[key];
-        const roi = profitToROI(profit);
-        const color = profit >= 0 ? "green" : "red";
-        const sign = profit >= 0 ? "+" : "";
-
-        return `${label}: ${key} → <span class="${color}">${sign}${profit.toFixed(2)} USD (${formatROI(roi)})</span><br>`;
-      }
-
+      function findWorst(map) { let worst = null; for (const key in map) { if (!worst || map[key] < map[worst]) worst = key; } return worst; }
+      function line(label, key, map) { if (!key) return ""; const profit = map[key]; const color = profit >= 0 ? "green" : "red"; const sign = profit >= 0 ? "+" : ""; return `${label}: ${key} → <span class="${color}">${sign}${profit.toFixed(2)} USD (${formatROI(profitToROI(profit))})</span><br>`; }
       const worstDay = findWorst(dayMap);
       const worstWeek = findWorst(weekMap);
       const worstMonth = findWorst(monthMap);
       const worstYear = findWorst(yearMap);
-
       let text = "📉 ช่วงที่แย่ที่สุด:<br>";
-
       text += line("วันแย่สุด", worstDay, dayMap);
       text += line("สัปดาห์แย่สุด", worstWeek, weekMap);
       text += line("เดือนแย่สุด", worstMonth, monthMap);
       text += line("ปีแย่สุด", worstYear, yearMap);
-
       return text;
     }
 
     function render() {
-      let net = calculateNetProfit();
-      let netEl = document.getElementById("netProfit");
-
+      const net = calculateNetProfit();
+      const netEl = document.getElementById("netProfit");
       netEl.innerText = Number(net) >= 0 ? "+" + net : net;
       netEl.style.color = Number(net) >= 0 ? "#22c55e" : "#ef4444";
 
-      let s = calculateStats();
-      let exp = calculateExpectancy(s);
-
+      const s = calculateStats();
+      const exp = calculateExpectancy(s);
       document.getElementById("winrate").innerText = s.wr + "%";
       document.getElementById("total").innerText = s.t;
       document.getElementById("avgWin").innerText = "+" + s.aw;
       document.getElementById("avgLoss").innerText = "-" + s.al;
-
-      let expEl = document.getElementById("expectancy");
+      const expEl = document.getElementById("expectancy");
       expEl.innerText = Number(exp) >= 0 ? "+" + exp : exp;
       expEl.style.color = Number(exp) >= 0 ? "#22c55e" : "#ef4444";
 
       renderROISummary();
 
-      let score = calcAIScore();
-
+      const score = calcAIScore();
       document.getElementById("aiScore").innerText = score;
-
-      document.getElementById("aiStatus").innerHTML =
-        score > 60
-          ? '<span class="green">GOOD</span>'
-          : score > 40
-          ? '<span class="orange">MID</span>'
-          : '<span class="red">BAD</span>';
-
-      document.getElementById("aiRisk").innerHTML =
-        score > 60
-          ? '<span class="green">LOW</span>'
-          : score > 40
-          ? '<span class="orange">MEDIUM</span>'
-          : '<span class="red">HIGH</span>';
-
+      document.getElementById("aiStatus").innerHTML = score > 60 ? '<span class="green">GOOD</span>' : score > 40 ? '<span class="orange">MID</span>' : '<span class="red">BAD</span>';
+      document.getElementById("aiRisk").innerHTML = score > 60 ? '<span class="green">LOW</span>' : score > 40 ? '<span class="orange">MEDIUM</span>' : '<span class="red">HIGH</span>';
       document.getElementById("aiCore").innerHTML = runAI();
       document.getElementById("aiCurrent").innerHTML = analyzeCurrentPerformance();
       document.getElementById("aiWorst").innerHTML = analyzeWorstPerformance();
       document.getElementById("aiInsight").innerHTML = analyzeInsight();
 
-      showList = [...records]
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 20);
-
-      let list = document.getElementById("list");
+      showList = [...records].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 20);
+      const list = document.getElementById("list");
       list.innerHTML = "";
-
       showList.forEach((r) => {
-        list.innerHTML += `
-          <div class="row">
-            <div>${r.date} | ${r.result} | ${r.reason} | ${r.qty}</div>
-            <div>
-              <button class="edit-btn" onclick="openEditModal('${r.id}')">✏️</button>
-              <button class="delete-btn" onclick="del('${r.id}')">🗑️</button>
-            </div>
-          </div>
-          <hr>
-        `;
+        list.innerHTML += `<div class="row"><div>${r.date} | ${r.result} | ${r.reason} | ${r.qty}</div><div><button class="edit-btn" onclick="openEditModal('${r.id}')">✏️</button><button class="delete-btn" onclick="del('${r.id}')">🗑️</button></div></div><hr>`;
       });
 
-      if (records.length > 0) {
-        setTimeout(() => {
-          drawCharts();
-          drawROICharts();
-        }, 100);
-      } else {
-        clearCharts();
-      }
+      if (records.length > 0) setTimeout(() => { drawCharts(); drawROICharts(); }, 100);
+      else clearCharts();
     }
 
     function clearCharts() {
-      [
-        equityChart,
-        timeChart,
-        reasonChart,
-        roiDailyChart,
-        roiWeeklyChart,
-        roiMonthlyChart
-      ].forEach((chart) => {
-        if (chart) chart.destroy();
-      });
-
+      [equityChart, timeChart, reasonChart, roiDailyChart, roiWeeklyChart, roiMonthlyChart].forEach((chart) => { if (chart) chart.destroy(); });
       equityChart = null;
       timeChart = null;
       reasonChart = null;
@@ -1379,174 +600,58 @@
 
     function drawCharts() {
       if (!records || records.length === 0) return;
-
-      let eq = [];
+      const eq = [];
       let bal = 0;
-
-      [...records]
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
-        .forEach((r) => {
-          bal += r.result === "win" ? r.qty : -r.qty;
-          eq.push(bal);
-        });
+      [...records].sort((a, b) => new Date(a.date) - new Date(b.date)).forEach((r) => { bal += r.result === "win" ? r.qty : -r.qty; eq.push(bal); });
 
       if (equityChart) equityChart.destroy();
-
       equityChart = new Chart(document.getElementById("equityChart"), {
         type: "line",
-        data: {
-          labels: eq.map((_, i) => i + 1),
-          datasets: [
-            {
-              data: eq,
-              borderColor: "gold",
-              borderWidth: 2,
-              tension: 0.3,
-              pointRadius: 0
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { display: false },
-            y: { ticks: { color: "#888" } }
-          },
-          plugins: {
-            legend: { display: false }
-          }
-        }
+        data: { labels: eq.map((_, i) => i + 1), datasets: [{ data: eq, borderColor: "gold", borderWidth: 2, tension: 0.3, pointRadius: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { ticks: { color: "#888" } } }, plugins: { legend: { display: false } } }
       });
 
       let peak = 0;
-      let dd = [];
-
-      eq.forEach((v) => {
-        if (v > peak) peak = v;
-        dd.push(v - peak);
-      });
+      const dd = [];
+      eq.forEach((v) => { if (v > peak) peak = v; dd.push(v - peak); });
 
       if (timeChart) timeChart.destroy();
-
       timeChart = new Chart(document.getElementById("timeChart"), {
         type: "line",
-        data: {
-          labels: dd.map((_, i) => i + 1),
-          datasets: [
-            {
-              data: dd,
-              borderColor: "red",
-              backgroundColor: "rgba(255,0,0,0.2)",
-              fill: true,
-              tension: 0.3,
-              pointRadius: 0
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            x: { display: false },
-            y: { ticks: { color: "#888" } }
-          }
-        }
+        data: { labels: dd.map((_, i) => i + 1), datasets: [{ data: dd, borderColor: "red", backgroundColor: "rgba(255,0,0,0.2)", fill: true, tension: 0.3, pointRadius: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: "#888" } } } }
       });
 
-      let map = {};
-
-      records.forEach((r) => {
-        if (!map[r.reason]) map[r.reason] = { w: 0, l: 0 };
-        map[r.reason][r.result === "win" ? "w" : "l"]++;
-      });
-
-      let labels = Object.keys(map);
-      let w = labels.map((x) => map[x].w);
-      let l = labels.map((x) => map[x].l);
+      const map = {};
+      records.forEach((r) => { if (!map[r.reason]) map[r.reason] = { w: 0, l: 0 }; map[r.reason][r.result === "win" ? "w" : "l"]++; });
+      const labels = Object.keys(map);
+      const w = labels.map((x) => map[x].w);
+      const l = labels.map((x) => map[x].l);
 
       if (reasonChart) reasonChart.destroy();
-
       reasonChart = new Chart(document.getElementById("reasonChart"), {
         type: "bar",
-        data: {
-          labels,
-          datasets: [
-            { label: "Win", data: w, backgroundColor: "#22c55e" },
-            { label: "Loss", data: l, backgroundColor: "#ef4444" }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { ticks: { color: "#888" } },
-            y: { ticks: { color: "#888" } }
-          }
-        }
+        data: { labels, datasets: [{ label: "Win", data: w, backgroundColor: "#22c55e" }, { label: "Loss", data: l, backgroundColor: "#ef4444" }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: "#888" } }, y: { ticks: { color: "#888" } } } }
       });
     }
 
     function drawROIChart(chartRef, canvasId, map) {
-      let labels = Object.keys(map).sort();
-      let data = labels.map((k) => profitToROI(map[k]));
-      let colors = data.map((v) => (Number(v) >= 0 ? "#22c55e" : "#ef4444"));
-
+      const labels = Object.keys(map).sort();
+      const data = labels.map((k) => profitToROI(map[k]));
+      const colors = data.map((v) => (Number(v) >= 0 ? "#22c55e" : "#ef4444"));
       if (chartRef) chartRef.destroy();
-
       return new Chart(document.getElementById(canvasId), {
         type: "bar",
-        data: {
-          labels,
-          datasets: [
-            {
-              data,
-              backgroundColor: colors
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            x: { ticks: { color: "#888" } },
-            y: {
-              ticks: {
-                color: "#888",
-                callback: function (value) {
-                  return value + "%";
-                }
-              }
-            }
-          }
-        }
+        data: { labels, datasets: [{ data, backgroundColor: colors }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: "#888" } }, y: { ticks: { color: "#888", callback: (value) => value + "%" } } } }
       });
     }
 
     function drawROICharts() {
-      roiDailyChart = drawROIChart(
-        roiDailyChart,
-        "roiDailyChart",
-        buildProfitMap("day")
-      );
-
-      roiWeeklyChart = drawROIChart(
-        roiWeeklyChart,
-        "roiWeeklyChart",
-        buildProfitMap("week")
-      );
-
-      roiMonthlyChart = drawROIChart(
-        roiMonthlyChart,
-        "roiMonthlyChart",
-        buildProfitMap("month")
-      );
+      roiDailyChart = drawROIChart(roiDailyChart, "roiDailyChart", buildProfitMap("day"));
+      roiWeeklyChart = drawROIChart(roiWeeklyChart, "roiWeeklyChart", buildProfitMap("week"));
+      roiMonthlyChart = drawROIChart(roiMonthlyChart, "roiMonthlyChart", buildProfitMap("month"));
     }
 
     window.addEventListener("DOMContentLoaded", () => {
