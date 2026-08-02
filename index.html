@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<!-- saved from url=(0097)https://stackblitzstartersdpe2mwcm-fplv-%2D8080-%2D87cf54cd.local-credentialless.webcontainer.io/ -->
+<html lang="th"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>Gold Trading Dashboard</title>
+
+    <script src="./index_files/chart.js.download"></script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background: radial-gradient(
+            circle at top left,
+            rgba(255, 215, 0, 0.08),
+            transparent 30%
+          ),
+          radial-gradient(
+            circle at top right,
+            rgba(34, 197, 94, 0.06),
+            transparent 30%
+          ),
+          #080808;
+        color: #fff;
+        margin: 0;
+      }
+
+      .container {
+        max-width: 1320px;
+        margin: auto;
+        padding: 22px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+        gap: 15px;
+      }
+
+      h2 {
+        font-size: 24px;
+        margin: 0;
+        letter-spacing: 0.3px;
+      }
+
+      h3 {
+        margin: 0 0 12px 0;
+      }
+
+      .subtitle {
+        font-size: 13px;
+        opacity: 0.55;
+        margin-top: 6px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+        margin-top: 14px;
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .grid-5 {
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 0.9fr 1.45fr;
+        align-items: stretch;
+      }
+
+      .chart-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        background: linear-gradient(145deg, #111, #1a1a1a);
+        border: 1px solid #242424;
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35),
+          inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        transition: 0.2s ease;
+      }
+
+      .card:hover {
+        border-color: rgba(255, 215, 0, 0.28);
+        box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45),
+          0 0 18px rgba(255, 215, 0, 0.08);
+      }
+
+      .hero-card {
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        padding: 26px;
+        border: 1px solid rgba(255, 215, 0, 0.22);
+        background: linear-gradient(
+            145deg,
+            rgba(255, 215, 0, 0.08),
+            transparent
+          ),
+          linear-gradient(145deg, #101010, #191919);
+      }
+
+      .hero-label {
+        opacity: 0.65;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+      }
+
+      .big {
+        font-size: 48px;
+        font-weight: 800;
+        margin-top: 8px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .kpi-bar .card,
+      .roi-summary .card {
+        min-height: 98px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        background: linear-gradient(180deg, #101010, #0b0b0b);
+      }
+
+      .kpi-label {
+        opacity: 0.55;
+        font-size: 13px;
+      }
+
+      .stat {
+        font-size: 24px;
+        font-weight: 800;
+        margin-top: 8px;
+      }
+
+      .green {
+        color: #22c55e;
+      }
+
+      .red {
+        color: #ef4444;
+      }
+
+      .orange {
+        color: orange;
+      }
+
+      .yellow {
+        color: gold;
+      }
+
+      .primary-btn {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        border: none;
+        padding: 11px 18px;
+        border-radius: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 8px 22px rgba(34, 197, 94, 0.22);
+      }
+
+      .primary-btn:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+      }
+
+      .ai-box {
+        border-left: 4px solid gold;
+        background: linear-gradient(
+            180deg,
+            rgba(255, 215, 0, 0.05),
+            transparent
+          ),
+          linear-gradient(145deg, #101010, #171717);
+      }
+
+      .mini-card {
+        text-align: center;
+        padding: 12px;
+        background: #0e0e0e;
+      }
+
+      .ai-section {
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid #252525;
+        background: rgba(255, 255, 255, 0.025);
+        line-height: 1.65;
+        font-size: 14px;
+      }
+
+      .chart-box {
+        height: 310px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chart-large {
+        height: 390px;
+      }
+
+      .chart-title {
+        font-weight: 800;
+        opacity: 0.8;
+        margin-bottom: 10px;
+        text-align: left;
+      }
+
+      .chart-box canvas {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .history-card {
+        margin-top: 16px;
+      }
+
+      #historyBox {
+        max-height: 310px;
+        overflow-y: auto;
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        text-align: left;
+        padding: 8px 0;
+        font-size: 14px;
+      }
+
+      .row button {
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 7px 10px;
+        cursor: pointer;
+      }
+
+      .edit-btn {
+        background: #f59e0b;
+      }
+
+      .delete-btn {
+        background: #ef4444;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 9px;
+        color: #fff;
+        background: #202020;
+        border: 1px solid #303030;
+        border-radius: 10px;
+      }
+
+      button {
+        margin-top: 8px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.78);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(6px);
+      }
+
+      .modal.show {
+        display: flex;
+      }
+
+      .modal-content {
+        width: 390px;
+        max-width: calc(100% - 30px);
+        background: linear-gradient(145deg, #101010, #1b1b1b);
+        border: 1px solid #333;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 0 35px rgba(255, 215, 0, 0.16);
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .close-btn {
+        background: #333;
+        color: #fff;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+      }
+
+      .save-btn {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: #fff;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      /* ✅ Loading ต้องอยู่นอก @media */
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        z-index: 99999;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(5px);
+      }
+
+      .loading-overlay.show {
+        display: flex;
+      }
+
+      .loader-box {
+        background: linear-gradient(145deg, #111, #1c1c1c);
+        border: 1px solid #333;
+        border-radius: 18px;
+        padding: 26px 32px;
+        min-width: 240px;
+        text-align: center;
+        box-shadow: 0 0 35px rgba(255, 215, 0, 0.2);
+        font-weight: bold;
+      }
+
+      .spinner {
+        width: 44px;
+        height: 44px;
+        border: 4px solid #333;
+        border-top: 4px solid gold;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 14px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 980px) {
+        .grid-5,
+        .grid-3,
+        .grid-2,
+        .dashboard-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .primary-btn {
+          width: 100%;
+        }
+
+        .chart-large {
+          height: 330px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="topbar">
+        <div>
+          <h2>📊 XAU AI Trading Journal</h2>
+          <div class="subtitle">
+            Gold Trading Journal + AI Coach + Google Sheets
+          </div>
+        </div>
+
+        <button class="primary-btn" onclick="openTradeModal()">
+          ➕ บันทึกเทรด
+        </button>
+      </div>
+
+      <div class="card hero-card">
+        <div class="hero-label">Net Profit</div>
+        <div id="netProfit" class="big" style="color: rgb(239, 68, 68);">-3665.89</div>
+      </div>
+
+      <div class="grid grid-5 kpi-bar">
+        <div class="card">
+          <div class="kpi-label">Winrate</div>
+          <div id="winrate" class="stat">41.67%</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Trades</div>
+          <div id="total" class="stat">48</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Avg Win</div>
+          <div id="avgWin" class="stat green">+26.17</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Avg Loss</div>
+          <div id="avgLoss" class="stat red">-149.62</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Expectancy</div>
+          <div id="expectancy" class="stat" style="color: rgb(239, 68, 68);">-76.37</div>
+        </div>
+      </div>
+
+      <div class="grid grid-3 roi-summary">
+        <div class="card">
+          <div class="kpi-label">ROI วันนี้</div>
+          <div id="roiToday" class="stat" style="color: rgb(34, 197, 94);">+0.00%</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">ROI สัปดาห์นี้</div>
+          <div id="roiWeek" class="stat" style="color: rgb(34, 197, 94);">+0.17%</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">ROI เดือนนี้</div>
+          <div id="roiMonth" class="stat" style="color: rgb(34, 197, 94);">+0.00%</div>
+        </div>
+      </div>
+
+      <div class="grid dashboard-grid">
+        <div class="card ai-box">
+          <h3>🤖 AI Trading Coach</h3>
+
+          <div class="grid grid-3">
+            <div class="card mini-card">
+              <div class="kpi-label">AI Score</div>
+              <div id="aiScore" class="stat">0</div>
+            </div>
+            <div class="card mini-card">
+              <div class="kpi-label">Status</div>
+              <div id="aiStatus" class="stat"><span class="red">BAD</span></div>
+            </div>
+            <div class="card mini-card">
+              <div class="kpi-label">Risk</div>
+              <div id="aiRisk" class="stat"><span class="red">HIGH</span></div>
+            </div>
+          </div>
+
+          <div class="ai-section" id="aiCore">📊 Winrate: 41.67%<br>📊 Avg Win: +26.17 | Avg Loss: -149.62<br><br>❌ ระบบติดลบ (Expectancy -76.37)<br><br>💥 ไม้พังสุด:<br>2025-09-14 | -1409<br>เหตุผล: นำเข้าข้อมูลย้อนหลัง<br>🔥 Loss ใหญ่กว่า Win → Risk Management มีปัญหา<br></div>
+          <div class="ai-section" id="aiCurrent">📌 สรุปปัจจุบัน:<br>วันนี้: <span class="green">+0.00 USD (+0.00%)</span><br>สัปดาห์นี้: <span class="green">+16.74 USD (+0.17%)</span><br>เดือนนี้: <span class="green">+0.00 USD (+0.00%)</span><br>รวมในปีนี้: <span class="red">-2256.89 USD (-22.57%)</span><br><br><span class="red">⚠️ ปีนี้ยังติดลบ ต้องลดความเสี่ยงและคุม loss</span></div>
+          <div class="ai-section" id="aiWorst">📉 ช่วงที่แย่ที่สุด:<br>วันแย่สุด: 2025-09-14 → <span class="red">-1409.00 USD (-14.09%)</span><br>สัปดาห์แย่สุด: 2025-W37 → <span class="red">-1409.00 USD (-14.09%)</span><br>เดือนแย่สุด: 2025-09 → <span class="red">-1409.00 USD (-14.09%)</span><br>ปีแย่สุด: 2026 → <span class="red">-2256.89 USD (-22.57%)</span><br><br><span class="red">🔥 จุดเสี่ยงหลักคือช่วงที่ loss หนัก ควรลด lot หลังเริ่มมี drawdown</span></div>
+          <div class="ai-section" id="aiInsight">💡 AI Insight:<br><span class="red">🔥 Loss ใหญ่ → Risk Management พัง</span><br><span class="red">❌ ระบบติดลบ → ควรลด lot และทบทวนแผน</span><br><br><span class="green">✅ แนะนำ: ลด lot + เลือก entry คุณภาพสูงขึ้น</span></div>
+        </div>
+
+        <div class="grid chart-panel">
+          <div class="card chart-box chart-large">
+            <div class="chart-title">📈 Equity Curve</div>
+            <canvas id="equityChart" width="743" height="356" style="display: block; box-sizing: border-box; height: 356px; width: 743.5px;"></canvas>
+          </div>
+
+          <div class="grid grid-2">
+            <div class="card chart-box">
+              <div class="chart-title">📉 Drawdown</div>
+              <canvas id="timeChart" width="346" height="276" style="display: block; box-sizing: border-box; height: 276px; width: 346.7px;"></canvas>
+            </div>
+
+            <div class="card chart-box">
+              <div class="chart-title">📊 Reason Analysis</div>
+              <canvas id="reasonChart" width="346" height="276" style="display: block; box-sizing: border-box; height: 276px; width: 346.7px;"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card chart-box">
+          <div class="chart-title">📊 ROI รายวัน</div>
+          <canvas id="roiDailyChart" width="380" height="276" style="display: block; box-sizing: border-box; height: 276px; width: 380.7px;"></canvas>
+        </div>
+        <div class="card chart-box">
+          <div class="chart-title">📆 ROI รายสัปดาห์</div>
+          <canvas id="roiWeeklyChart" width="380" height="276" style="display: block; box-sizing: border-box; height: 276px; width: 380.7px;"></canvas>
+        </div>
+        <div class="card chart-box">
+          <div class="chart-title">📈 ROI รายเดือน</div>
+          <canvas id="roiMonthlyChart" width="380" height="276" style="display: block; box-sizing: border-box; height: 276px; width: 380.7px;"></canvas>
+        </div>
+      </div>
+
+      <div class="card history-card">
+        <h3>History</h3>
+        <div id="historyBox">
+          <div id="list">
+          <div class="row">
+            <div>2026-07-31 | win | คุมความเสี่ยงเก่ง | 3.76</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260731&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260731&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-30 | win | คุมความเสี่ยงเก่ง | 0.61</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260730&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260730&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-29 | win | วินัยสูง | 21.92</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260729&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260729&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-28 | loss | โอเวอร์เทรด | 2.99</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260728&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260728&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-27 | loss | โอเวอร์เทรด | 6.56</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260727&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260727&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-24 | win | คุมความเสี่ยงเก่ง | 24.8</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260724&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260724&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-23 | win | คุมความเสี่ยงเก่ง | 6.01</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260723&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260723&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-22 | loss | โอเวอร์เทรด | 12.32</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260722&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260722&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-21 | win | คุมความเสี่ยงเก่ง | 12.14</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260721&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260721&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-20 | win | คุมความเสี่ยงเก่ง | 0.9</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260720&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260720&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-17 | win | คุมความเสี่ยงเก่ง | 11.1</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260717&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260717&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-16 | win | คุมความเสี่ยงเก่ง | 3.15</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260716&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260716&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-15 | win | วิเคราะห์ตัวเอง | 6.72</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260715&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260715&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-14 | loss | โอเวอร์เทรด | 26.57</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260714&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260714&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-13 | loss | โอเวอร์เทรด | 0.21</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260713&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260713&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-10 | loss | โอเวอร์เทรด | 27.42</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260710&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260710&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-09 | loss | โอเวอร์เทรด | 48.4</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260709&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260709&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-08 | loss | โอเวอร์เทรด | 13.52</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260708&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260708&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-07 | loss | โอเวอร์เทรด | 43.2</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260707&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260707&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        
+          <div class="row">
+            <div>2026-07-06 | loss | โอเวอร์เทรด | 29.56</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal(&#39;T20260706&#39;)">✏️</button>
+              <button class="delete-btn" onclick="del(&#39;T20260706&#39;)">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tradeModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">➕ บันทึกเทรด</h3>
+          <button class="close-btn" onclick="closeTradeModal()">✕</button>
+        </div>
+
+        <input type="date" id="date">
+
+        <select id="result">
+          <option value="win">✅ เทรดชนะ</option>
+          <option value="loss">❌ เทรดเสีย</option>
+        </select>
+
+        <select id="reason"><option value="">--เลือกเหตุผล--</option><option value="มีแผนชัด (Trading Plan)">มีแผนชัด (Trading Plan)</option><option value="มี Edge">มี Edge</option><option value="วินัยสูง">วินัยสูง</option><option value="คุมความเสี่ยงเก่ง">คุมความเสี่ยงเก่ง</option><option value="Cut Loss เร็ว">Cut Loss เร็ว</option><option value="ไม่เทรดเยอะ">ไม่เทรดเยอะ</option><option value="วิเคราะห์ตัวเอง">วิเคราะห์ตัวเอง</option><option value="คุมอารมณ์ได้">คุมอารมณ์ได้</option></select>
+
+        <input id="qty" type="number" placeholder="USD">
+
+        <button class="save-btn" onclick="save()">SAVE</button>
+      </div>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="loader-box">
+        <div class="spinner"></div>
+        <div id="loadingText">กำลังดำเนินการ...</div>
+      </div>
+    </div>
+
+    <script>
+      const SHEET_API_URL =
+        'https://script.google.com/macros/s/AKfycbw-has2KXQnuvwOYutMof0Y4ly0emoBRFMhBTsptTro8de6TJ0s-8G4spkAY5BZR-aN/exec';
+      const SHEET_TOKEN = 'PONGTHEP_SECRET_123';
+
+      let records = [];
+      let showList = [];
+      let editingId = null;
+
+      const INITIAL_CAPITAL = 10000;
+
+      let equityChart = null;
+      let reasonChart = null;
+      let timeChart = null;
+      let roiDailyChart = null;
+      let roiWeeklyChart = null;
+      let roiMonthlyChart = null;
+
+      const resultEl = document.getElementById('result');
+      const reasonEl = document.getElementById('reason');
+
+      const lossReasons = [
+        'ไม่มีแผน',
+        'ใช้อารมณ์',
+        'โอเวอร์เทรด',
+        'ไม่ยอม Cut Loss',
+        'ไม่มี Edge',
+        'เปลี่ยนระบบบ่อย',
+        'ไม่เรียนรู้จากอดีต',
+        'Position size ผิด',
+      ];
+
+      const winReasons = [
+        'มีแผนชัด (Trading Plan)',
+        'มี Edge',
+        'วินัยสูง',
+        'คุมความเสี่ยงเก่ง',
+        'Cut Loss เร็ว',
+        'ไม่เทรดเยอะ',
+        'วิเคราะห์ตัวเอง',
+        'คุมอารมณ์ได้',
+      ];
+
+      function setLoading(show, text = 'กำลังดำเนินการ...') {
+        const overlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+
+        if (!overlay || !loadingText) {
+          console.error('ไม่พบ loadingOverlay หรือ loadingText');
+          return;
+        }
+
+        loadingText.innerText = text;
+
+        if (show) {
+          overlay.classList.add('show');
+        } else {
+          overlay.classList.remove('show');
+        }
+      }
+
+      function loadReasons() {
+        let arr = resultEl.value === 'win' ? winReasons : lossReasons;
+        reasonEl.innerHTML = "<option value=''>--เลือกเหตุผล--</option>";
+
+        arr.forEach((r) => {
+          reasonEl.innerHTML += `<option value="${r}">${r}</option>`;
+        });
+      }
+
+      resultEl.onchange = loadReasons;
+      loadReasons();
+
+      function openTradeModal() {
+        editingId = null;
+
+        document.getElementById('modalTitle').innerText = '➕ บันทึกเทรด';
+        document.getElementById('date').value = '';
+        document.getElementById('qty').value = '';
+        resultEl.value = 'win';
+        loadReasons();
+        reasonEl.value = '';
+
+        document.getElementById('tradeModal').classList.add('show');
+      }
+
+      function openEditModal(id) {
+        const item = records.find((r) => String(r.id) === String(id));
+
+        if (!item) {
+          alert('ไม่พบรายการที่ต้องการแก้ไข');
+          return;
+        }
+
+        editingId = item.id;
+
+        document.getElementById('modalTitle').innerText = '✏️ แก้ไขรายการ';
+        document.getElementById('date').value = item.date;
+        resultEl.value = item.result;
+        loadReasons();
+        reasonEl.value = item.reason;
+        document.getElementById('qty').value = item.qty;
+
+        document.getElementById('tradeModal').classList.add('show');
+      }
+
+      function closeTradeModal() {
+        editingId = null;
+        document.getElementById('tradeModal').classList.remove('show');
+      }
+
+      document
+        .getElementById('tradeModal')
+        .addEventListener('click', function (e) {
+          if (e.target.id === 'tradeModal') {
+            closeTradeModal();
+          }
+        });
+
+      function loadData(afterLoad) {
+        const callbackName = 'loadSheetCallback_' + Date.now();
+        const script = document.createElement('script');
+
+        window[callbackName] = function (response) {
+          if (!response.success) {
+            alert('โหลดข้อมูลไม่สำเร็จ: ' + response.message);
+            delete window[callbackName];
+            script.remove();
+
+            if (afterLoad) afterLoad();
+            return;
+          }
+
+          records = response.data.map((r) => ({
+            id: String(r.id || ''),
+            date: String(r.date || ''),
+            result: String(r.result || '')
+              .trim()
+              .toLowerCase(),
+            reason: String(r.reason || ''),
+            qty: Number(r.qty) || 0,
+          }));
+
+          render();
+
+          delete window[callbackName];
+          script.remove();
+
+          if (afterLoad) afterLoad();
+        };
+
+        script.src = `${SHEET_API_URL}?callback=${callbackName}&token=${SHEET_TOKEN}`;
+        document.body.appendChild(script);
+      }
+
+      function save() {
+        let date = document.getElementById('date').value;
+        let result = resultEl.value;
+        let reason = reasonEl.value;
+        let qty = parseFloat(document.getElementById('qty').value) || 0;
+
+        if (!date || !reason || !qty) {
+          alert('กรอกข้อมูลให้ครบ');
+          return;
+        }
+
+        const isEdit = editingId !== null;
+
+        const payload = {
+          token: SHEET_TOKEN,
+          action: isEdit ? 'update' : 'add',
+          id: isEdit ? editingId : 'T' + Date.now(),
+          date,
+          result,
+          reason,
+          qty,
+        };
+
+        setLoading(
+          true,
+          isEdit ? 'กำลังแก้ไขข้อมูล...' : 'กำลังบันทึกข้อมูล...'
+        );
+
+        fetch(SHEET_API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+          body: JSON.stringify(payload),
+        })
+          .then(() => {
+            document.getElementById('date').value = '';
+            document.getElementById('qty').value = '';
+            reasonEl.value = '';
+
+            closeTradeModal();
+
+            setTimeout(() => {
+              loadData(() => {
+                setLoading(false);
+              });
+            }, 900);
+          })
+          .catch((err) => {
+            console.error(err);
+            setLoading(false);
+            alert('บันทึกไม่สำเร็จ');
+          });
+      }
+
+      function del(id) {
+        if (!confirm('ต้องการลบรายการนี้ใช่ไหม?')) return;
+
+        setLoading(true, 'กำลังลบข้อมูล...');
+
+        fetch(SHEET_API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+          body: JSON.stringify({
+            token: SHEET_TOKEN,
+            action: 'delete',
+            id,
+          }),
+        })
+          .then(() => {
+            setTimeout(() => {
+              loadData(() => {
+                setLoading(false);
+              });
+            }, 900);
+          })
+          .catch((err) => {
+            console.error(err);
+            setLoading(false);
+            alert('ลบข้อมูลไม่สำเร็จ');
+          });
+      }
+
+      function calculateNetProfit() {
+        let p = 0;
+
+        records.forEach((r) => {
+          const result = String(r.result || '')
+            .trim()
+            .toLowerCase();
+          const qty = Number(r.qty) || 0;
+
+          if (result === 'win') {
+            p += qty;
+          } else if (result === 'loss') {
+            p -= qty;
+          }
+        });
+
+        return p.toFixed(2);
+      }
+
+      function calculateStats() {
+        let w = 0;
+        let l = 0;
+        let tw = 0;
+        let tl = 0;
+
+        records.forEach((r) => {
+          const result = String(r.result || '')
+            .trim()
+            .toLowerCase();
+          const qty = Number(r.qty) || 0;
+
+          if (result === 'win') {
+            w++;
+            tw += qty;
+          } else if (result === 'loss') {
+            l++;
+            tl += qty;
+          }
+        });
+
+        let t = w + l;
+
+        return {
+          w,
+          l,
+          t,
+          wr: t ? ((w / t) * 100).toFixed(2) : '0.00',
+          aw: w ? (tw / w).toFixed(2) : '0.00',
+          al: l ? (tl / l).toFixed(2) : '0.00',
+        };
+      }
+
+      function calculateExpectancy(s) {
+        let winrate = s.w / s.t || 0;
+        let lossrate = s.l / s.t || 0;
+        return (winrate * s.aw - lossrate * s.al).toFixed(2);
+      }
+
+      function calcAIScore() {
+        let s = calculateStats();
+        let exp = Number(calculateExpectancy(s));
+
+        let score = 50;
+
+        score += Number(s.wr) > 50 ? 20 : -20;
+        score += exp > 0 ? 20 : -20;
+        score += Number(s.aw) > Number(s.al) ? 10 : -10;
+
+        return Math.max(0, Math.min(100, Math.round(score)));
+      }
+
+      function runAI() {
+        if (records.length === 0) return 'ยังไม่มีข้อมูล';
+
+        let text = '';
+        let s = calculateStats();
+        let exp = calculateExpectancy(s);
+
+        text += `📊 Winrate: ${s.wr}%<br>`;
+        text += `📊 Avg Win: +${s.aw} | Avg Loss: -${s.al}<br><br>`;
+
+        if (Number(exp) > 0) {
+          text += `✅ ระบบมีกำไร (Expectancy +${exp})<br>`;
+        } else {
+          text += `❌ ระบบติดลบ (Expectancy ${exp})<br>`;
+        }
+
+        let worst = records
+          .filter((r) => r.result === 'loss')
+          .sort((a, b) => b.qty - a.qty)[0];
+
+        if (worst) {
+          text += `<br>💥 ไม้พังสุด:<br>${worst.date} | -${worst.qty}<br>เหตุผล: ${worst.reason}<br>`;
+        }
+
+        if (Number(s.al) > Number(s.aw)) {
+          text += `🔥 Loss ใหญ่กว่า Win → Risk Management มีปัญหา<br>`;
+        }
+
+        if (Number(s.wr) < 40) {
+          text += `⚠️ Winrate ต่ำ → Entry ยังไม่ดีพอ<br>`;
+        }
+
+        return text;
+      }
+
+      function getWeekNumber(date) {
+        let d = new Date(
+          Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+        );
+        let dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+
+        return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+      }
+
+      function getWeekKey(date) {
+        let d = new Date(date);
+        return (
+          d.getFullYear() + '-W' + String(getWeekNumber(d)).padStart(2, '0')
+        );
+      }
+
+      function getMonthKey(date) {
+        let d = new Date(date);
+        return (
+          d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+        );
+      }
+      function getTodayKey() {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+      }
+
+      function getYearKey(date) {
+        const d = new Date(date);
+        return String(d.getFullYear());
+      }
+      function buildProfitMap(type) {
+        let map = {};
+
+        records.forEach((r) => {
+          let key = '';
+          const result = String(r.result || '')
+            .trim()
+            .toLowerCase();
+          const qty = Number(r.qty) || 0;
+
+          if (type === 'day') key = r.date;
+          if (type === 'week') key = getWeekKey(r.date);
+          if (type === 'month') key = getMonthKey(r.date);
+          if (type === 'year') key = getYearKey(r.date);
+
+          if (!map[key]) map[key] = 0;
+
+          if (result === 'win') map[key] += qty;
+          if (result === 'loss') map[key] -= qty;
+        });
+
+        return map;
+      }
+
+      function profitToROI(profit) {
+        return Number(((profit / INITIAL_CAPITAL) * 100).toFixed(2));
+      }
+
+      function formatROI(value) {
+        let num = Number(value);
+        return (num >= 0 ? '+' : '') + num.toFixed(2) + '%';
+      }
+
+      function setROIValue(id, value) {
+        let el = document.getElementById(id);
+        let num = Number(value);
+
+        el.innerText = formatROI(num);
+        el.style.color = num >= 0 ? '#22c55e' : '#ef4444';
+      }
+
+      function renderROISummary() {
+        let today = new Date().toISOString().slice(0, 10);
+        let weekKey = getWeekKey(today);
+        let monthKey = getMonthKey(today);
+
+        let dayMap = buildProfitMap('day');
+        let weekMap = buildProfitMap('week');
+        let monthMap = buildProfitMap('month');
+
+        setROIValue('roiToday', profitToROI(dayMap[today] || 0));
+        setROIValue('roiWeek', profitToROI(weekMap[weekKey] || 0));
+        setROIValue('roiMonth', profitToROI(monthMap[monthKey] || 0));
+      }
+      function analyzeROI() {
+        if (records.length === 0) {
+          return '📊 ROI:<br>ยังไม่มีข้อมูลให้วิเคราะห์';
+        }
+
+        const dayMap = buildProfitMap('day');
+        const weekMap = buildProfitMap('week');
+        const monthMap = buildProfitMap('month');
+
+        function findBestWorst(map) {
+          let best = null;
+          let worst = null;
+
+          for (let key in map) {
+            if (!best || map[key] > map[best]) best = key;
+            if (!worst || map[key] < map[worst]) worst = key;
+          }
+
+          return { best, worst };
+        }
+
+        const d = findBestWorst(dayMap);
+        const w = findBestWorst(weekMap);
+        const m = findBestWorst(monthMap);
+
+        let text = '📊 ROI Analysis:<br>';
+
+        // ✅ ROI รายวัน
+        if (d.best) {
+          const bestROI = profitToROI(dayMap[d.best]);
+          const worstROI = profitToROI(dayMap[d.worst]);
+
+          text += `<br>📊 ROI รายวัน:<br>`;
+          text += `<span class="green">ดีที่สุด: ${d.best} (${formatROI(
+            bestROI
+          )})</span><br>`;
+          text += `<span class="${worstROI >= 0 ? 'green' : 'red'}">แย่สุด: ${
+            d.worst
+          } (${formatROI(worstROI)})</span><br>`;
+        }
+
+        // ✅ ROI รายสัปดาห์
+        if (w.best) {
+          const bestROI = profitToROI(weekMap[w.best]);
+          const worstROI = profitToROI(weekMap[w.worst]);
+
+          text += `<br>📆 ROI รายสัปดาห์:<br>`;
+          text += `<span class="green">ดีที่สุด: ${w.best} (${formatROI(
+            bestROI
+          )})</span><br>`;
+          text += `<span class="${worstROI >= 0 ? 'green' : 'red'}">แย่สุด: ${
+            w.worst
+          } (${formatROI(worstROI)})</span><br>`;
+        }
+
+        // ✅ ROI รายเดือน
+        if (m.best) {
+          const bestROI = profitToROI(monthMap[m.best]);
+          const worstROI = profitToROI(monthMap[m.worst]);
+
+          text += `<br>📈 ROI รายเดือน:<br>`;
+          text += `<span class="green">ดีที่สุด: ${m.best} (${formatROI(
+            bestROI
+          )})</span><br>`;
+          text += `<span class="${worstROI >= 0 ? 'green' : 'red'}">แย่สุด: ${
+            m.worst
+          } (${formatROI(worstROI)})</span><br>`;
+        }
+
+        // ✅ สรุปภาพรวม
+        const totalProfit = records.reduce((sum, r) => {
+          const result = String(r.result || '')
+            .trim()
+            .toLowerCase();
+          const qty = Number(r.qty) || 0;
+
+          if (result === 'win') return sum + qty;
+          if (result === 'loss') return sum - qty;
+
+          return sum;
+        }, 0);
+
+        const totalROI = profitToROI(totalProfit);
+
+        text += `<br>🎯 ROI รวมทั้งหมด: `;
+        text += `<span class="${totalROI >= 0 ? 'green' : 'red'}">${formatROI(
+          totalROI
+        )}</span><br>`;
+
+        if (totalROI > 0) {
+          text += `<span class="green">✅ ภาพรวมยังเป็นบวก ระบบเริ่มมี edge</span>`;
+        } else if (totalROI < 0) {
+          text += `<span class="red">⚠️ ภาพรวม ROI ติดลบ ควรลด lot และทบทวนจุดเข้า</span>`;
+        } else {
+          text += `<span class="orange">⚠️ ROI รวมใกล้ศูนย์ ยังไม่มีความได้เปรียบชัดเจน</span>`;
+        }
+
+        return text;
+      }
+      function analyzeInsight() {
+        let s = calculateStats();
+        let exp = Number(calculateExpectancy(s));
+        let text = '💡 AI Insight:<br>';
+
+        if (records.length === 0) {
+          text += 'ยังไม่มีข้อมูลให้วิเคราะห์';
+          return text;
+        }
+
+        if (Number(s.al) > Number(s.aw)) {
+          text += `<span class="red">🔥 Loss ใหญ่ → Risk Management พัง</span><br>`;
+        }
+
+        if (Number(s.wr) < 40) {
+          text += `<span class="orange">⚠️ Winrate ต่ำ → ควรคัด entry ให้เข้มขึ้น</span><br>`;
+        }
+
+        if (exp < 0) {
+          text += `<span class="red">❌ ระบบติดลบ → ควรลด lot และทบทวนแผน</span><br>`;
+        }
+
+        text += `<br><span class="green">✅ แนะนำ: ลด lot + เลือก entry คุณภาพสูงขึ้น</span>`;
+
+        return text;
+      }
+      function analyzeCurrentPerformance() {
+        if (records.length === 0) {
+          return '📌 สรุปปัจจุบัน:<br>ยังไม่มีข้อมูลให้วิเคราะห์';
+        }
+
+        const todayKey = getTodayKey();
+        const weekKey = getWeekKey(todayKey);
+        const monthKey = getMonthKey(todayKey);
+        const yearKey = getYearKey(todayKey);
+
+        const dayMap = buildProfitMap('day');
+        const weekMap = buildProfitMap('week');
+        const monthMap = buildProfitMap('month');
+        const yearMap = buildProfitMap('year');
+
+        const todayProfit = dayMap[todayKey] || 0;
+        const weekProfit = weekMap[weekKey] || 0;
+        const monthProfit = monthMap[monthKey] || 0;
+        const yearProfit = yearMap[yearKey] || 0;
+
+        const todayROI = profitToROI(todayProfit);
+        const weekROI = profitToROI(weekProfit);
+        const monthROI = profitToROI(monthProfit);
+        const yearROI = profitToROI(yearProfit);
+
+        function line(label, profit, roi) {
+          const color = profit >= 0 ? 'green' : 'red';
+          const sign = profit >= 0 ? '+' : '';
+
+          return `${label}: <span class="${color}">${sign}${profit.toFixed(
+            2
+          )} USD (${formatROI(roi)})</span><br>`;
+        }
+
+        let text = '📌 สรุปปัจจุบัน:<br>';
+
+        text += line('วันนี้', todayProfit, todayROI);
+        text += line('สัปดาห์นี้', weekProfit, weekROI);
+        text += line('เดือนนี้', monthProfit, monthROI);
+        text += line('รวมในปีนี้', yearProfit, yearROI);
+
+        if (yearProfit > 0) {
+          text += `<br><span class="green">✅ ปีนี้ภาพรวมยังเป็นบวก</span>`;
+        } else if (yearProfit < 0) {
+          text += `<br><span class="red">⚠️ ปีนี้ยังติดลบ ต้องลดความเสี่ยงและคุม loss</span>`;
+        } else {
+          text += `<br><span class="orange">⚠️ ปีนี้ยังใกล้ศูนย์ ยังไม่มี edge ชัดเจน</span>`;
+        }
+
+        return text;
+      }
+      function analyzeWorstPerformance() {
+        if (records.length === 0) {
+          return '📉 ช่วงที่แย่ที่สุด:<br>ยังไม่มีข้อมูลให้วิเคราะห์';
+        }
+
+        const dayMap = buildProfitMap('day');
+        const weekMap = buildProfitMap('week');
+        const monthMap = buildProfitMap('month');
+        const yearMap = buildProfitMap('year');
+
+        function findWorst(map) {
+          let worst = null;
+
+          for (let key in map) {
+            if (!worst || map[key] < map[worst]) {
+              worst = key;
+            }
+          }
+
+          return worst;
+        }
+
+        function line(label, key, map) {
+          if (!key) return '';
+
+          const profit = map[key];
+          const roi = profitToROI(profit);
+          const color = profit >= 0 ? 'green' : 'red';
+          const sign = profit >= 0 ? '+' : '';
+
+          return `${label}: ${key} → <span class="${color}">${sign}${profit.toFixed(
+            2
+          )} USD (${formatROI(roi)})</span><br>`;
+        }
+
+        const worstDay = findWorst(dayMap);
+        const worstWeek = findWorst(weekMap);
+        const worstMonth = findWorst(monthMap);
+        const worstYear = findWorst(yearMap);
+
+        let text = '📉 ช่วงที่แย่ที่สุด:<br>';
+
+        text += line('วันแย่สุด', worstDay, dayMap);
+        text += line('สัปดาห์แย่สุด', worstWeek, weekMap);
+        text += line('เดือนแย่สุด', worstMonth, monthMap);
+        text += line('ปีแย่สุด', worstYear, yearMap);
+
+        const worstYearProfit = worstYear ? yearMap[worstYear] : 0;
+
+        if (worstYearProfit < 0) {
+          text += `<br><span class="red">🔥 จุดเสี่ยงหลักคือช่วงที่ loss หนัก ควรลด lot หลังเริ่มมี drawdown</span>`;
+        } else {
+          text += `<br><span class="green">✅ ยังไม่มีปีที่ติดลบจากข้อมูลที่มี</span>`;
+        }
+
+        return text;
+      }
+      function render() {
+        let net = calculateNetProfit();
+        let netEl = document.getElementById('netProfit');
+
+        netEl.innerText = Number(net) >= 0 ? '+' + net : net;
+        netEl.style.color = Number(net) >= 0 ? '#22c55e' : '#ef4444';
+
+        let s = calculateStats();
+        let exp = calculateExpectancy(s);
+
+        document.getElementById('winrate').innerText = s.wr + '%';
+        document.getElementById('total').innerText = s.t;
+        document.getElementById('avgWin').innerText = '+' + s.aw;
+        document.getElementById('avgLoss').innerText = '-' + s.al;
+
+        let expEl = document.getElementById('expectancy');
+        expEl.innerText = Number(exp) >= 0 ? '+' + exp : exp;
+        expEl.style.color = Number(exp) >= 0 ? '#22c55e' : '#ef4444';
+
+        renderROISummary();
+
+        let score = calcAIScore();
+
+        document.getElementById('aiScore').innerText = score;
+
+        document.getElementById('aiStatus').innerHTML =
+          score > 60
+            ? '<span class="green">GOOD</span>'
+            : score > 40
+            ? '<span class="orange">MID</span>'
+            : '<span class="red">BAD</span>';
+
+        document.getElementById('aiRisk').innerHTML =
+          score > 60
+            ? '<span class="green">LOW</span>'
+            : score > 40
+            ? '<span class="orange">MEDIUM</span>'
+            : '<span class="red">HIGH</span>';
+
+        document.getElementById('aiCore').innerHTML = runAI();
+        document.getElementById('aiCurrent').innerHTML =
+          analyzeCurrentPerformance();
+        document.getElementById('aiWorst').innerHTML =
+          analyzeWorstPerformance();
+        document.getElementById('aiInsight').innerHTML = analyzeInsight();
+
+        showList = [...records]
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .slice(0, 20);
+
+        let list = document.getElementById('list');
+        list.innerHTML = '';
+
+        showList.forEach((r) => {
+          list.innerHTML += `
+          <div class="row">
+            <div>${r.date} | ${r.result} | ${r.reason} | ${r.qty}</div>
+            <div>
+              <button class="edit-btn" onclick="openEditModal('${r.id}')">✏️</button>
+              <button class="delete-btn" onclick="del('${r.id}')">🗑️</button>
+            </div>
+          </div>
+          <hr>
+        `;
+        });
+
+        if (records.length > 0) {
+          setTimeout(() => {
+            drawCharts();
+            drawROICharts();
+          }, 100);
+        } else {
+          clearCharts();
+        }
+      }
+
+      function clearCharts() {
+        [
+          equityChart,
+          timeChart,
+          reasonChart,
+          roiDailyChart,
+          roiWeeklyChart,
+          roiMonthlyChart,
+        ].forEach((chart) => {
+          if (chart) chart.destroy();
+        });
+
+        equityChart = null;
+        timeChart = null;
+        reasonChart = null;
+        roiDailyChart = null;
+        roiWeeklyChart = null;
+        roiMonthlyChart = null;
+      }
+
+      function drawCharts() {
+        if (!records || records.length === 0) return;
+
+        let eq = [];
+        let bal = 0;
+
+        [...records]
+          .sort((a, b) => new Date(a.date) - new Date(b.date))
+          .forEach((r) => {
+            bal += r.result === 'win' ? r.qty : -r.qty;
+            eq.push(bal);
+          });
+
+        if (equityChart) equityChart.destroy();
+
+        equityChart = new Chart(document.getElementById('equityChart'), {
+          type: 'line',
+          data: {
+            labels: eq.map((_, i) => i + 1),
+            datasets: [
+              {
+                data: eq,
+                borderColor: 'gold',
+                borderWidth: 2,
+                tension: 0.3,
+                pointRadius: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { display: false },
+              y: { ticks: { color: '#888' } },
+            },
+            plugins: {
+              legend: { display: false },
+            },
+          },
+        });
+
+        let peak = 0;
+        let dd = [];
+
+        eq.forEach((v) => {
+          if (v > peak) peak = v;
+          dd.push(v - peak);
+        });
+
+        if (timeChart) timeChart.destroy();
+
+        timeChart = new Chart(document.getElementById('timeChart'), {
+          type: 'line',
+          data: {
+            labels: dd.map((_, i) => i + 1),
+            datasets: [
+              {
+                data: dd,
+                borderColor: 'red',
+                backgroundColor: 'rgba(255,0,0,0.2)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+            },
+            scales: {
+              x: { display: false },
+              y: { ticks: { color: '#888' } },
+            },
+          },
+        });
+
+        let map = {};
+
+        records.forEach((r) => {
+          if (!map[r.reason]) map[r.reason] = { w: 0, l: 0 };
+          map[r.reason][r.result === 'win' ? 'w' : 'l']++;
+        });
+
+        let labels = Object.keys(map);
+        let w = labels.map((x) => map[x].w);
+        let l = labels.map((x) => map[x].l);
+
+        if (reasonChart) reasonChart.destroy();
+
+        reasonChart = new Chart(document.getElementById('reasonChart'), {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Win', data: w, backgroundColor: '#22c55e' },
+              { label: 'Loss', data: l, backgroundColor: '#ef4444' },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: '#888' } },
+              y: { ticks: { color: '#888' } },
+            },
+          },
+        });
+      }
+
+      function drawROIChart(chartRef, canvasId, map) {
+        let labels = Object.keys(map).sort();
+        let data = labels.map((k) => profitToROI(map[k]));
+        let colors = data.map((v) => (Number(v) >= 0 ? '#22c55e' : '#ef4444'));
+
+        if (chartRef) chartRef.destroy();
+
+        return new Chart(document.getElementById(canvasId), {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              {
+                data,
+                backgroundColor: colors,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+            },
+            scales: {
+              x: { ticks: { color: '#888' } },
+              y: {
+                ticks: {
+                  color: '#888',
+                  callback: function (value) {
+                    return value + '%';
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function drawROICharts() {
+        roiDailyChart = drawROIChart(
+          roiDailyChart,
+          'roiDailyChart',
+          buildProfitMap('day')
+        );
+
+        roiWeeklyChart = drawROIChart(
+          roiWeeklyChart,
+          'roiWeeklyChart',
+          buildProfitMap('week')
+        );
+
+        roiMonthlyChart = drawROIChart(
+          roiMonthlyChart,
+          'roiMonthlyChart',
+          buildProfitMap('month')
+        );
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        loadData();
+      });
+    </script>
+  
+
+
+      <script>
+        const source = new EventSource('/livereload');
+        const reload = () => location.reload(true);
+        source.onmessage = reload;
+        source.onerror = () => (source.onopen = reload);
+        console.log('[servor] listening for file changes');
+      </script>
+    </body></html>
